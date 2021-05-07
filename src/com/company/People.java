@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class People extends JPanel implements ActionListener{
     private Connection c = DBC.getInstance().getConnection();
@@ -12,7 +14,7 @@ public class People extends JPanel implements ActionListener{
     private JButton bZoek, bDoorvoeren, bAnnuleren;
     private JPanel north, west, south, east, center;
     private CustomerPanel p;
-    private JLabel resultaat;
+    private JLabel resultaat, succesMsg;
     private boolean contentOpen;
 
     People() throws SQLException {
@@ -28,6 +30,7 @@ public class People extends JPanel implements ActionListener{
 
         add(south = new JPanel(new FlowLayout(FlowLayout.RIGHT)), BorderLayout.SOUTH);
         south.setPreferredSize(new Dimension(0, 100));
+        south.add(succesMsg = new JLabel());
         south.add(bDoorvoeren = new JButton("Doorvoeren"));
         south.add(bAnnuleren = new JButton("Annuleren"));
         bDoorvoeren.addActionListener(this);
@@ -43,11 +46,11 @@ public class People extends JPanel implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()==bZoek){
             try {
-                int cID = Integer.parseInt(tfCustomer.getText());
+                int kID = Integer.parseInt(tfCustomer.getText());
                 if (p != null){
                     remove(p);
                 }
-                add(p = new CustomerPanel(c, getPersoonsgegevens(cID)), BorderLayout.CENTER );
+                add(p = new CustomerPanel(c, kID), BorderLayout.CENTER );
                 contentOpen = true;
                 resultaat.setText("Resultaat:");
             } catch (SQLException | NumberFormatException error) {
@@ -58,7 +61,7 @@ public class People extends JPanel implements ActionListener{
         if (e.getSource()==bDoorvoeren && contentOpen){
             try {
                 voerDoor();
-                p.setMsg();
+                setMsg();
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -69,13 +72,6 @@ public class People extends JPanel implements ActionListener{
         }
         revalidate();
         repaint();
-    }
-
-    private ResultSet getPersoonsgegevens(int klantid) throws SQLException {
-        PreparedStatement stmt = c.prepareStatement("select * from klant where klantid = ?");
-        stmt.setInt(1, klantid);
-
-        return stmt.executeQuery();
     }
 
     private void voerDoor() throws SQLException {
@@ -96,7 +92,10 @@ public class People extends JPanel implements ActionListener{
         stmt.close();
     }
 
-    public void setResultaat(){
-        resultaat.setText("Geen resultaat!");
+    public void setMsg() {
+        succesMsg.setOpaque(true);
+        succesMsg.setBackground(Color.green);
+        DateTimeFormatter sdf = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        succesMsg.setText("<html><body>Wijzigingen succesvol doorgevoerd<br>"+" Laatste wijziging: "+sdf.format(LocalDateTime.now())+"<body><html>");
     }
 }
