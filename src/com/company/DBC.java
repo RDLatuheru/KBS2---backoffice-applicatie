@@ -8,7 +8,7 @@ public class DBC {
     private static DBC instance;
     private Connection con;
 
-    private DBC() throws SQLException{
+    private DBC(){
         try{
             con = DriverManager.getConnection("jdbc:mysql://localhost/nerdygadgets", "root", "");
         }catch (SQLException e){

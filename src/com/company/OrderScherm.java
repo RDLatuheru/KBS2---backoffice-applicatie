@@ -10,7 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.*;
 
-public class OrderScherm extends JFrame implements ActionListener, ListSelectionListener {
+public class OrderScherm extends JPanel implements ActionListener, ListSelectionListener {
     JScrollPane scrollPane;
     JList<Backorder> lijstBackorder;
     Connection c = DBC.getInstance().getConnection();
@@ -21,10 +21,8 @@ public class OrderScherm extends JFrame implements ActionListener, ListSelection
 
     //Initialiseer scherm
     OrderScherm() throws SQLException {
-        setSize(600, 600);
+        setPreferredSize(new Dimension(600,600));
         setLayout(new FlowLayout(FlowLayout.LEFT));
-        setTitle("Orderoverzicht");
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         backorders = new Backorder[fetchCountAll()];
         r = fetchAll();
@@ -52,8 +50,10 @@ public class OrderScherm extends JFrame implements ActionListener, ListSelection
         scrollPane = new JScrollPane(lijstBackorder);
         scrollPane.setPreferredSize(new Dimension(230, 500));
         add(scrollPane);
+    }
 
-        setVisible(true);
+    public String toString() {
+        return "Orders";
     }
 
     @Override

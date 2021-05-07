@@ -6,106 +6,97 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 
-public class People extends JFrame implements ActionListener{
+public class People extends JPanel implements ActionListener{
     private Connection c = DBC.getInstance().getConnection();
     private JTextField tfCustomer;
     private JButton bZoek, bDoorvoeren, bAnnuleren;
-    private JPanel north, west, south, east;
+    private JPanel north, west, south, east, center;
     private CustomerPanel p;
+    private JLabel resultaat;
+    private boolean contentOpen;
 
     People() throws SQLException {
-        setSize(400, 400);
+        setPreferredSize(new Dimension(400, 400));
         setLayout(new BorderLayout());
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setTitle("Klantbeheer");
 
         add(north = new JPanel(new FlowLayout(FlowLayout.LEFT)), BorderLayout.NORTH);
         north.add(new JLabel("Klantnummer:"));
         north.add(tfCustomer = new JTextField(5));
         north.add(bZoek = new JButton("Zoeken"));
+        north.add(resultaat = new JLabel());
         bZoek.addActionListener(this);
 
-        add(south = new JPanel(new FlowLayout(FlowLayout.CENTER)), BorderLayout.SOUTH);
+        add(south = new JPanel(new FlowLayout(FlowLayout.RIGHT)), BorderLayout.SOUTH);
+        south.setPreferredSize(new Dimension(0, 100));
         south.add(bDoorvoeren = new JButton("Doorvoeren"));
         south.add(bAnnuleren = new JButton("Annuleren"));
         bDoorvoeren.addActionListener(this);
         bAnnuleren.addActionListener(this);
 
+
         //opvulling
         add(west = new JPanel(), BorderLayout.WEST);
         add(east = new JPanel(), BorderLayout.EAST);
-
-        setVisible(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()==bZoek){
-            int cID = Integer.parseInt(tfCustomer.getText());
             try {
+                int cID = Integer.parseInt(tfCustomer.getText());
                 if (p != null){
                     remove(p);
                 }
                 add(p = new CustomerPanel(c, getPersoonsgegevens(cID)), BorderLayout.CENTER );
+                contentOpen = true;
+                resultaat.setText("Resultaat:");
+            } catch (SQLException | NumberFormatException error) {
+                resultaat.setText("Geen resultaat! ");
+                error.printStackTrace();
+            }
+        }
+        if (e.getSource()==bDoorvoeren && contentOpen){
+            try {
+                voerDoor();
+                p.setMsg();
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
         }
-        if (e.getSource()==bDoorvoeren){
-            try {
-                voerDoor();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
+        if (e.getSource()==bAnnuleren && contentOpen){
+            contentOpen = false;
+            remove(p);
         }
         revalidate();
         repaint();
     }
 
-    private ResultSet getPersoonsgegevens(int customerID) throws SQLException {
-        PreparedStatement stmt = c.prepareStatement("select * from customers where customerid = ?");
-        stmt.setInt(1, customerID);
+    private ResultSet getPersoonsgegevens(int klantid) throws SQLException {
+        PreparedStatement stmt = c.prepareStatement("select * from klant where klantid = ?");
+        stmt.setInt(1, klantid);
 
         return stmt.executeQuery();
     }
 
     private void voerDoor() throws SQLException {
-        PreparedStatement stmt = c.prepareStatement("update customers set customername = ?, phonenumber = ?, faxnumber = ?, PostalAddressLine2 = ?," +
-                "DeliveryAddressLine2 = ?, DeliveryPostalCode = ?, PostalAddressLine1 = ? where customerid = ?");
-        stmt.setString(1, p.getCustomerName());
-        stmt.setString(2, p.getPhone());
-        stmt.setString(3, p.getFax());
-        stmt.setString(4, p.getPlaats());
-        stmt.setString(5, p.getStraaths());
-        stmt.setString(6, p.getPostcode());
-        stmt.setString(7, p.getPobox());
-        stmt.setInt(8, p.getCustomerID());
+        PreparedStatement stmt = c.prepareStatement("update klant set naam = ?, achternaam = ?, email = ?, telefoon = ?," +
+                "straat = ?, huisnummer = ?, postcode = ?, plaats = ?, actief = ? where klantid  = ?");
+        stmt.setString(1, p.getNaam());
+        stmt.setString(2, p.getAchternaam());
+        stmt.setString(3, p.getEmail());
+        stmt.setString(4, p.getTelefoon());
+        stmt.setString(5, p.getStraat());
+        stmt.setString(6, p.getHuisnummer());
+        stmt.setString(7, p.getPostcode());
+        stmt.setString(8, p.getPlaats());
+        stmt.setByte(9, (byte) p.getCbActief());
+        stmt.setInt(10, p.getId());
 
         stmt.executeUpdate();
         stmt.close();
     }
 
-    //Oud spul ter ondersteuning
-    /*public int[] getCustomerArray() throws SQLException {
-        int[] idArray = new int[countCustomers()];
-
-        PreparedStatement s = c.prepareStatement("Select customerid from customers where customerid > ?");
-        s.setInt(1, 601);
-        ResultSet r = s.executeQuery();
-
-        for (int i = 0; i < countCustomers(); i++) {
-            r.next();
-            idArray[i] = Integer.parseInt( r.getString("customerid"));
-        }
-        return idArray;
+    public void setResultaat(){
+        resultaat.setText("Geen resultaat!");
     }
-
-    public int countCustomers() throws SQLException {
-        PreparedStatement stmt = c.prepareStatement("select count(customerid) from customers where customerid > ?");
-        stmt.setInt(1, 601);
-        ResultSet rs = stmt.executeQuery();
-        rs.next();
-
-        return rs.getInt(1);
-    }*/
 }
