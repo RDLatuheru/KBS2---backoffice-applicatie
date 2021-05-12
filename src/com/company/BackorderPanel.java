@@ -1,6 +1,7 @@
 package com.company;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,7 +10,7 @@ import java.sql.*;
 public class BackorderPanel extends JPanel implements ActionListener {
     Connection c;
     ResultSet r;
-    JLabel ldOrderID, lCustomerID, lOrderDate;
+    JLabel ldOrderID, lCustomerID, lOrderDate, lblMsg;
     JTextField tfSalesID, tfPickedID, tfExpected;
     JButton bDoorvoeren;
 
@@ -19,8 +20,8 @@ public class BackorderPanel extends JPanel implements ActionListener {
         r.next();
 
         setLayout(new GridLayout(0,2));
-        setPreferredSize(new Dimension(310, 300));
-        setBackground(Color.WHITE );
+        setPreferredSize(new Dimension(900, 300));
+        setBorder(new TitledBorder("Backorder"));
 
         add(new JLabel("Order ID: "));
         add(ldOrderID = new JLabel(String.valueOf(r.getInt(1))));
@@ -35,9 +36,11 @@ public class BackorderPanel extends JPanel implements ActionListener {
         add(new JLabel("Verkoper ID: "));
         add(tfSalesID = new JTextField(String.valueOf(r.getInt(3))));
         add(new JLabel());
-
-        add(bDoorvoeren = new JButton("Doorvoeren"));
+        add(lblMsg = new JLabel());
+        JPanel p = new JPanel();
+        p.add(bDoorvoeren = new JButton("Doorvoeren"));
         bDoorvoeren.addActionListener(this);
+        add(p);
     }
 
     @Override
@@ -46,6 +49,8 @@ public class BackorderPanel extends JPanel implements ActionListener {
             try {
                 updateBackorder();
                 getParent().revalidate();
+                lblMsg.setForeground(Color.green);
+                lblMsg.setText("Wijzigingen doorgevoerd");
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }

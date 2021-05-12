@@ -1,11 +1,12 @@
 package com.company;
 
+import java.net.ConnectException;
 import java.sql.*;
 
 public class Main {
 
-    public static void main(String[] args) throws SQLException{
+    public static void main(String[] args) throws SQLException {
 	// write your code here
-        Scherm s = new Scherm();
+        Inlogscherm s = new Inlogscherm();
     }
 }

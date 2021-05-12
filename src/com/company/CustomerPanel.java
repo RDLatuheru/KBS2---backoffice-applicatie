@@ -2,15 +2,8 @@ package com.company;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-import javax.xml.transform.Result;
 import java.awt.*;
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -18,11 +11,10 @@ import java.time.format.DateTimeFormatter;
 
 public class CustomerPanel extends JTabbedPane {
     private Connection c;
-    private ResultSet pg, bg, bl;
+    private ResultSet pg, bg, bl; //Persoonsgegevens, Bestellingsgegevens, BestellingLijn
     private JLabel id, succesMsg;
     private JTextField naam, achternaam, email, telefoon, plaats, straat, postcode, huisnummer;
-    private LayoutManager grid = new GridLayout(0,2);
-    private JPanel pPersoonsgegevens, pAdresgegevens, pBestellingen, pBestelling;
+    private JPanel pPersoonsgegevens, pBestellingen, pBestelling;
     private JCheckBox cbActief;
     private int klantID;
     private JTable t;
@@ -33,7 +25,6 @@ public class CustomerPanel extends JTabbedPane {
         pg = fetchKlant(klantID);
         pg.next();
         bg = fetchKlantBestellingen(klantID);
-        //bg.next();
 
         int isActief = pg.getInt(10);
         boolean b = false;
@@ -69,7 +60,7 @@ public class CustomerPanel extends JTabbedPane {
             int i = (int) t.getModel().getValueAt(t.getSelectedRow(), 0);
             System.out.println(i);
             try {
-                pBestelling = generateBestelling(i);
+                pBestelling = generateBestellingLijn(i);
                 pBestellingen.add(pBestelling);
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
@@ -77,11 +68,9 @@ public class CustomerPanel extends JTabbedPane {
             repaint();
             revalidate();
         });
-
-        System.out.println(pPersoonsgegevens.getWidth());
     }
 
-    private JPanel generateBestelling(int id) throws SQLException {
+    private JPanel generateBestellingLijn(int id) throws SQLException {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setPreferredSize(new Dimension(750, 300));
@@ -92,7 +81,7 @@ public class CustomerPanel extends JTabbedPane {
             a.setBorder(new EtchedBorder());
 
             a.add(new JLabel("Artikel:"));
-            a.add(new JLabel(r.getInt(1) +":\t "+r.getString(3)));
+            a.add(new JLabel(r.getInt(1) +": "+r.getString(3)));
             a.add(new JLabel("Aantal:"));
             a.add(new JLabel(String.valueOf(r.getInt(2))));
 
