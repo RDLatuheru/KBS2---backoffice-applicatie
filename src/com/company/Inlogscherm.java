@@ -52,13 +52,14 @@ public class Inlogscherm extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         String accountype = (String) cbInlogAls.getSelectedItem();
+        System.out.println(accountype);
         if (e.getSource() == bInloggen){
             try {
                 if (c == null || c.isClosed()){
                     c = DBC.getInstance().getConnection();
                 }
                 if (checkCredentials(tfGebruikersnaam.getText(), pfWachtwoord.getPassword(), accountype)){
-                    if (accountype != null && accountype.equals("magazijnmedewerker")){
+                    if (accountype.equals("Magazijnmedewerker")){
                         Scherm scherm = new Scherm(rsMedewerker);
                     }else{
                         BezorgerMainScherm scherm = new BezorgerMainScherm();
