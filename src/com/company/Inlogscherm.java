@@ -13,6 +13,7 @@ public class Inlogscherm extends JFrame implements ActionListener {
     private JLabel lblMsg;
     private Connection c;
     private ResultSet rsMedewerker;
+    private JComboBox cbInlogAls;
 
 
     public Inlogscherm() throws SQLException {
@@ -35,6 +36,13 @@ public class Inlogscherm extends JFrame implements ActionListener {
         lblMsg.setFont(new Font("default", Font.PLAIN, 10));
         content.add(bInloggen = new JButton("Inloggen"));
         bInloggen.addActionListener(this);
+        content.add(new JPanel());
+
+        String[] accountTypes = {"Magazijnmedewerker", "Bezorger"};
+        cbInlogAls = new JComboBox(accountTypes);
+        cbInlogAls.setSelectedIndex(0);
+        cbInlogAls.addActionListener(this);
+        content.add(cbInlogAls);
 
         add(content);
 
@@ -43,13 +51,18 @@ public class Inlogscherm extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        String accountype = (String) cbInlogAls.getSelectedItem();
         if (e.getSource() == bInloggen){
             try {
                 if (c == null || c.isClosed()){
                     c = DBC.getInstance().getConnection();
                 }
-                if (checkCredentials(tfGebruikersnaam.getText(), pfWachtwoord.getPassword())){
-                    Scherm scherm = new Scherm(rsMedewerker);
+                if (checkCredentials(tfGebruikersnaam.getText(), pfWachtwoord.getPassword(), accountype)){
+                    if (accountype != null && accountype.equals("magazijnmedewerker")){
+                        Scherm scherm = new Scherm(rsMedewerker);
+                    }else{
+                        BezorgerMainScherm scherm = new BezorgerMainScherm();
+                    }
                     setVisible(false);
                 }else{
                     lblMsg.setText("Onjuiste gebruikersnaam en/of wachtwoord");
@@ -61,10 +74,12 @@ public class Inlogscherm extends JFrame implements ActionListener {
         }
     }
 
-    private boolean checkCredentials(String gebruikersnaam, char[] wachtwoord) throws SQLException {
-        PreparedStatement s = c.prepareStatement("select * from medewerker where gebruikersnaam = ? and wachtwoord = ?");
+    private boolean checkCredentials(String gebruikersnaam, char[] wachtwoord, String functie) throws SQLException {
+        PreparedStatement s = c.prepareStatement("select * from medewerker where gebruikersnaam = ? and wachtwoord = ? " +
+                "and functie = ?");
         s.setString(1, gebruikersnaam);
         s.setString(2, String.valueOf(wachtwoord));
+        s.setString(3, functie);
         rsMedewerker = s.executeQuery();
 
         return rsMedewerker.next();
