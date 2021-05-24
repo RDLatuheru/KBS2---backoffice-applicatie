@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 
 public class Scherm extends JFrame implements ActionListener {
-    private MenuButton bKlant, bOrder, bArtikel, isSelected;
+    private MenuButton bKlant, bOrder, bArtikel,bRoute, isSelected;
     private JPanel pMenuWrapper, pMenuButtons, pMenuAccount, pContentWrapper, pContent, pOverviewWrapper, pOverview;
 
     Scherm(ResultSet resultSet) throws SQLException {
@@ -56,6 +56,8 @@ public class Scherm extends JFrame implements ActionListener {
         bOrder.addActionListener(this);
         pMenuButtons.add(bArtikel = new MenuButton("Vooraadbeheer"));
         bArtikel.addActionListener(this);
+        pMenuButtons.add(bRoute = new MenuButton("Route Bepaling"));
+        bRoute.addActionListener(this);
 
         //CENTER
         //Content - wrapper
@@ -111,6 +113,16 @@ public class Scherm extends JFrame implements ActionListener {
             try {
                 ArtikelScherm a = new ArtikelScherm();
                 pContentWrapper.add(a);
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        if (isSelected==bRoute){
+            System.out.println("route scherm");
+            RouteScherm r = null;
+            try {
+                r = new RouteScherm();
+                pContentWrapper.add(r);
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
